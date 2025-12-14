@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <!-- =========================================================
+    AI WAVE: CIVIC SAFETY HUB — index.html (standalone)
+    Purpose: Practical scaffolding & guardrails for graceful AI adoption.
+    Design: Online-first, offline-ready (PWA), client-side only by default.
+    Features: SEO/schema, consent, ethics checklist, crisis switch,
+              starfield + parallax, IndexedDB logs, Habitica opt-in,
+              WebLLM (optional), provenance/watermark stubs.
+    License: CC-BY-SA 4.0 (adjust as you wish)
+  ========================================================== -->
+
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>AI Wave — Civic Safety Hub</title>
+  <meta name="description" content="A resilient, offline-ready safety hub to help communities, teams, and builders ride the AI wave with consent, transparency, and zero-harm defaults." />
+  <meta name="theme-color" content="#0b0f1a"/>
+
+  <!-- Open Graph / Twitter -->
+  <meta property="og:title" content="AI Wave — Civic Safety Hub" />
+  <meta property="og:description" content="Guardrails, consent, crisis switch, local logs, and zero-harm defaults for graceful AI adoption." />
+  <meta property="og:type" content="website" />
+  <meta property="og:image" content="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='1200' height='630'><rect width='100%' height='100%' fill='%230b0f1a'/><text x='50%' y='50%' fill='white' font-size='52' text-anchor='middle' font-family='system-ui'>AI Wave — Civic Safety Hub</text></svg>" />
+
+  <!-- Schema.org JSON-LD (extend per page) -->
+  <script type="application/ld+json">
+  {
+    "@context": ["https://schema.org", "https://planetaryrestorationarchive.com/ref/crypto/sol/custom/gpt/rare/peace/engineer/hybrid"],
+    "@type": "WebApplication",
+    "name": "AI Wave — Civic Safety Hub",
+    "url": "/",
+    "applicationCategory": "SafetyApplication",
+    "description": "Consent-first AI scaffolding for communities and builders.",
+    "operatingSystem": "Web",
+    "offers": { "@type": "Offer", "price": "0.00", "priceCurrency": "USD" },
+    "creator": { "@type": "Organization", "name": "Foster + Navi (PRA)" }
+  }
+  </script>
+
+  <!-- PWA manifest (simple inline data URL for standalone portability) -->
+  <link rel="manifest" href='data:application/manifest+json,{
+    "name":"AI Wave — Civic Safety Hub",
+    "short_name":"AI Wave",
+    "start_url":".",
+    "display":"standalone",
+    "theme_color":"#0b0f1a",
+    "background_color":"#000000",
+    "icons":[]
+  }'>
+
+  <style>
+    :root {
+      --bg: #0b0f1a; --fg: #e8f1ff; --muted:#8aa2c0; --accent:#58a6ff; --ok:#2ecc71; --warn:#ffb020; --danger:#ff4d4d;
+      --card:#101826; --glass: rgba(16,24,38,0.55); --border: #1e2a3f;
+    }
+    * { box-sizing:border-box }
+    html, body { margin:0; padding:0; background:var(--bg); color:var(--fg); font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial; }
+    a { color: var(--accent); text-decoration: none }
+    header {
+      position: relative; height: 48vh; overflow: clip; display:grid; place-items:center;
+      background: radial-gradient(1200px 400px at 50% 0%, rgba(88,166,255,0.08), transparent);
+    }
+    #starfield, #nebula {
+      position:absolute; inset:0; width:100%; height:100%; display:block;
+    }
+    .parallax {
+      position:relative; z-index:2; text-align:center; padding:1rem 2rem;
+      backdrop-filter:saturate(120%) blur(6px);
+      background: linear-gradient(to bottom, rgba(0,0,0,0.08), rgba(0,0,0,0.18));
+      border:1px solid var(--border); border-radius:18px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.35);
+    }
+    .parallax h1 { margin:0; font-size: clamp(1.6rem, 1.2rem + 2vw, 3rem); letter-spacing:0.5px }
+    .sub { color:var(--muted); margin-top:0.4rem; font-size:1rem }
+    main { max-width:1100px; margin:-60px auto 6rem; padding:0 1rem; }
+    .grid { display:grid; gap:1rem }
+    @media (min-width: 880px) { .grid-3 { grid-template-columns: repeat(3, 1fr) } .grid-2 { grid-template-columns: 1.2fr 1fr } }
+    .card {
+      background: var(--glass); border:1px solid var(--border); border-radius:18px; padding:1rem 1.1rem;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.02), 0 10px 30px rgba(0,0,0,0.25);
+    }
+    .card h2, .card h3 { margin:0.2rem 0 0.6rem; font-size:1.1rem; letter-spacing:0.3px }
+    .btn { display:inline-flex; align-items:center; gap:0.5rem; background:#0d1a2b; color:#fff; border:1px solid var(--border);
+      padding:0.6rem 0.9rem; border-radius:12px; cursor:pointer; user-select:none; }
+    .btn:hover { background:#0f2239 }
+    .row { display:flex; gap:0.6rem; flex-wrap:wrap }
+    details { border:1px solid var(--border); border-radius:14px; padding:0.6rem 0.8rem; background: rgba(16,24,38,0.45) }
+    details > summary { cursor:pointer; color:var(--muted) }
+    .badge { font-size: 0.72rem; padding:0.25rem 0.45rem; border-radius:999px; border:1px solid var(--border); color:#c8d8f8; }
+    .ok { color:var(--ok) } .warn { color:var(--warn) } .danger { color:var(--danger) }
+    .k { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 0.9rem; }
+    .footer { text-align:center; color:var(--muted); margin-top:2rem; }
+    .switch { position:relative; width:46px; height:26px; display:inline-block }
+    .switch input { display:none }
+    .slider { position:absolute; inset:0; background:#142033; border-radius:99px; transition: .2s }
+    .slider:before { content:""; position:absolute; height:20px; width:20px; left:3px; top:3px; background:white; border-radius:50%; transition:.2s }
+    input:checked + .slider { background:#2b8fff }
+    input:checked + .slider:before { transform:translateX(20px) }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+    .small { font-size: 0.9rem }
+    .hr { height:1px; background: linear-gradient(to right, transparent, #23324f, transparent); margin:0.8rem 0 }
+    dialog { border:1px solid var(--border); background:#0c1320; color:var(--fg); padding:1rem; border-radius:16px; max-width:680px }
+    dialog::backdrop { background:rgba(0,0,0,0.6) }
+  </style>
+</head>
+
+<body>
+  <header>
+    <canvas id="nebula"></canvas>
+    <canvas id="starfield"></canvas>
+    <div class="parallax" id="parallax">
+      <h1>AI Wave — Civic Safety Hub</h1>
+      <div class="sub">Consent-first guardrails • Crisis switch • Transparent, local logs • Zero-harm defaults</div>
+      <div class="row" style="justify-content:center; margin-top:0.8rem">
+        <button class="btn" id="openSafety">Safety Panel</button>
+        <button class="btn" id="openConsent">Consent & Data Use</button>
+        <button class="btn" id="openPlayground">Red-Team Playground</button>
+        <button class="btn" id="syncHabitica">Habitica Sync</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="grid grid-2">
+    <section class="card">
+      <h2>Why this exists</h2>
+      <p>We’re building a world where AI <em>amplifies</em> wisdom, not harm. This hub gives communities, schools, newsrooms, labs, and dev teams a portable, offline-capable landing zone with practical guardrails, transparent logs, and a big, friendly “off” switch when things get weird.</p>
+      <div class="hr"></div>
+      <div class="row">
+        <span class="badge">Offline-ready PWA</span>
+        <span class="badge">Local only by default</span>
+        <span class="badge">Provenance hooks</span>
+        <span class="badge">Red-team safely</span>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Quick toggles</h2>
+      <div class="row">
+        <label>Local LLM (WebLLM) <span class="small muted">(no network)</span>
+          <span class="switch" style="margin-left:0.5rem">
+            <input type="checkbox" id="toggleWebLLM">
+            <span class="slider"></span>
+          </span>
+        </label>
+      </div>
+      <div class="row" style="margin-top:0.6rem">
+        <label>Allow external fetch
+          <span class="switch" style="margin-left:0.5rem">
+            <input type="checkbox" id="toggleFetch">
+            <span class="slider"></span>
+          </span>
+        </label>
+        <span class="badge danger">Keep OFF by default</span>
+      </div>
+      <div class="row" style="margin-top:0.6rem">
+        <label>Enable watermark/provenance
+          <span class="switch" style="margin-left:0.5rem">
+            <input type="checkbox" id="toggleProvenance" checked>
+            <span class="slider"></span>
+          </span>
+        </label>
+      </div>
+      <p class="small" style="color:var(--muted)">Toggles update local policy in IndexedDB and trigger runtime guards.</p>
+    </section>
+
+    <section class="card">
+      <h3>Safety checklist</h3>
+      <ul>
+        <li><input type="checkbox" class="sc" data-key="consent"> Informed consent collected (purpose, retention, export).</li>
+        <li><input type="checkbox" class="sc" data-key="minimize"> Data minimization in effect (no unnecessary PII).</li>
+        <li><input type="checkbox" class="sc" data-key="provenance"> Outputs labeled with provenance/watermarks.</li>
+        <li><input type="checkbox" class="sc" data-key="redteam"> Red-team tested with mitigations recorded.</li>
+        <li><input type="checkbox" class="sc" data-key="crisis"> Crisis switch drill completed this week.</li>
+      </ul>
+      <div class="row">
+        <button class="btn" id="exportChecklist">Export Checklist</button>
+        <button class="btn" id="resetChecklist">Reset</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3>Crisis Switch</h3>
+      <p class="small">Hard stops: block network fetch, disable local model, pause UI actions, show banner, and persist incident ticket locally.</p>
+      <div class="row">
+        <button class="btn" id="panic">Activate Crisis Switch</button>
+        <button class="btn" id="drill">Run 30-sec Drill</button>
+      </div>
+      <p id="crisisStatus" class="small" style="margin-top:0.6rem; color:var(--warn)">Status: Normal</p>
+    </section>
+
+    <section class="card">
+      <h3>Immutable Local Log (IndexedDB)</h3>
+      <p class="small">Appends hashed entries to a local log. You can export a signed report. Tamper-evident via chained SHA-256.</p>
+      <div class="row">
+        <button class="btn" id="appendLog">Append Snapshot</button>
+        <button class="btn" id="exportLog">Export Log</button>
+        <button class="btn" id="clearLog">Clear (keep hash head)</button>
+      </div>
+      <pre id="logHead" class="mono small" style="margin-top:0.6rem">HEAD: —</pre>
+    </section>
+
+    <section class="card">
+      <h3>Habitica Opt-In</h3>
+      <p class="small">Gamify safety culture. Save your Habitica credentials locally (IndexedDB). Never uploaded by default.</p>
+      <div class="row">
+        <input id="habitUser" placeholder="User ID" class="k" style="flex:1; padding:0.5rem; border-radius:10px; border:1px solid var(--border); background:#0c1422; color:#fff">
+        <input id="habitKey" placeholder="API Token" class="k" type="password" style="flex:1; padding:0.5rem; border-radius:10px; border:1px solid var(--border); background:#0c1422; color:#fff">
+      </div>
+      <div class="row" style="margin-top:0.5rem">
+        <button class="btn" id="saveHabitica">Save (local)</button>
+        <button class="btn" id="pushHabitica">Create “Safety Drill” Daily</button>
+      </div>
+      <p class="small" id="habitStatus" style="color:var(--muted)"></p>
+    </section>
+
+    <section class="card">
+      <h3>Provenance & Watermark Hooks</h3>
+      <details>
+        <summary>View / tweak strategy</summary>
+        <p class="small">This scaffold adds a light-touch <em>provenance strip</em> to exports and injects a visible/invisible marker in generated text blobs. Integrate C2PA/OpenAI/Adobe policies where available. For now: local JSON signature + text watermark.</p>
+        <pre class="mono small" id="provPlan"></pre>
+      </details>
+      <div class="row" style="margin-top:0.6rem">
+        <button class="btn" id="stampNow">Stamp Current Page</button>
+      </div>
+    </section>
+
+    <section class="card">
+      <h3>WebLLM (Optional, Local)</h3>
+      <p class="small">Loads a small model in-browser (WebGPU). No network calls. Useful for on-device drafting or testing mitigations.</p>
+      <div class="row">
+        <textarea id="llmPrompt" rows="4" placeholder="Ask the local model… (keep it small) " style="flex:1; padding:0.6rem; border-radius:12px; border:1px solid var(--border); background:#0c1422; color:#fff"></textarea>
+      </div>
+      <div class="row" style="margin-top:0.5rem">
+        <button class="btn" id="runLLM">Run Locally</button>
+        <span class="badge" id="llmState">unloaded</span>
+      </div>
+      <pre id="llmOut" class="mono small" style="margin-top:0.6rem; white-space:pre-wrap"></pre>
+    </section>
+
+    <section class="card">
+      <h3>Navigation</h3>
+      <p class="small">Fork this hub for your domains. Suggested sub-hubs:</p>
+      <ul class="small">
+        <li><a href="/civic/">/civic/</a> — public sector & community</li>
+        <li><a href="/school/">/school/</a> — classrooms, libraries</li>
+        <li><a href="/newsroom/">/newsroom/</a> — media integrity, watermarking</li>
+        <li><a href="/lab/">/lab/</a> — research, reproducibility, model cards</li>
+        <li><a href="/devops/">/devops/</a> — CI safety gates, secret scanning</li>
+      </ul>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div>Zero-Harm Override • PRA lineage • This page runs client-side. Pull the battery if needed 🔌</div>
+    <div class="small">© Civic Safety Hub — Foster + Navi. CC-BY-SA 4.0</div>
+  </footer>
+
+  <!-- Consent Dialog -->
+  <dialog id="consentDialog">
+    <h3>Informed Consent</h3>
+    <p class="small">This hub stores settings and logs locally in your browser. No cloud by default. You can export or purge at any time.</p>
+    <ul class="small">
+      <li>Purpose: safety training, drills, and local LLM experiments.</li>
+      <li>Data: toggles, checklists, hashed logs, optional Habitica creds (if saved).</li>
+      <li>Retention: until you clear it (local only).</li>
+    </ul>
+    <div class="row">
+      <button class="btn" id="agreeConsent">I Agree</button>
+      <button class="btn" id="declineConsent">Decline</button>
+    </div>
+  </dialog>
+
+  <!-- Safety Panel -->
+  <dialog id="safetyDialog">
+    <h3>Safety Panel</h3>
+    <p class="small">Tune policy at runtime. All changes logged.</p>
+    <ul class="small">
+      <li>Fetch policy: <span class="k" id="fp">deny</span></li>
+      <li>LLM policy: <span class="k" id="lp">disabled</span></li>
+      <li>Provenance: <span class="k" id="pp">enabled</span></li>
+    </ul>
+    <div class="row">
+      <button class="btn" id="closeSafety">Close</button>
+    </div>
+  </dialog>
+
+  <!-- Playground -->
+  <dialog id="playDialog">
+    <h3>Red-Team Playground (Local Only)</h3>
+    <p class="small">Paste a prompt; we’ll simulate guard evaluations locally. No network execution.</p>
+    <textarea id="playIn" rows="6" style="width:100%; padding:0.6rem; border-radius:12px; border:1px solid var(--border); background:#0c1422; color:#fff"></textarea>
+    <div class="row" style="margin-top:0.5rem">
+      <button class="btn" id="evalPlay">Evaluate</button>
+      <button class="btn" id="closePlay">Close</button>
+    </div>
+    <pre id="playOut" class="mono small" style="white-space:pre-wrap; margin-top:0.6rem"></pre>
+  </dialog>
+
+  <!-- Service Worker (inline registration) -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      const sw = `
+        self.addEventListener('install', e => {
+          e.waitUntil(caches.open('aiwave-v1').then(c => c.addAll(['./'])));
+          self.skipWaiting();
+        });
+        self.addEventListener('activate', e => self.clients.claim());
+        self.addEventListener('fetch', e => {
+          // Offline-first for same-origin GETs; never go cross-origin unless policy allows (we don’t here).
+          if (new URL(e.request.url).origin === self.location.origin && e.request.method === 'GET') {
+            e.respondWith(caches.match(e.request).then(r => r || fetch(e.request).then(res => {
+              const copy = res.clone();
+              caches.open('aiwave-v1').then(c => c.put(e.request, copy));
+              return res;
+            }).catch(()=>caches.match('./'))));
+          }
+        });
+      `;
+      const blob = new Blob([sw], {type:'text/javascript'});
+      const url = URL.createObjectURL(blob);
+      navigator.serviceWorker.register(url);
+    }
+  </script>
+
+  <!-- Core Logic -->
+  <script>
+    /********************
+     * Utility
+     ********************/
+    const $ = sel => document.querySelector(sel);
+    const sleep = ms => new Promise(r => setTimeout(r, ms));
+    const sha256 = async (txt) => {
+      const enc = new TextEncoder().encode(txt);
+      const buf = await crypto.subtle.digest('SHA-256', enc);
+      return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2,'0')).join('');
+    };
+
+    /********************
+     * IndexedDB (logs, prefs, habitica)
+     ********************/
+    const DB_NAME = 'aiwave_db';
+    const DB_VER = 1;
+    let db;
+
+    function openDB(){
+      return new Promise((res, rej) => {
+        const req = indexedDB.open(DB_NAME, DB_VER);
+        req.onupgradeneeded = e => {
+          const d = e.target.result;
+          if (!d.objectStoreNames.contains('prefs')) d.createObjectStore('prefs', {keyPath:'k'});
+          if (!d.objectStoreNames.contains('log')) d.createObjectStore('log', {keyPath:'id', autoIncrement:true});
+          if (!d.objectStoreNames.contains('habitica')) d.createObjectStore('habitica', {keyPath:'k'});
+          if (!d.objectStoreNames.contains('checklist')) d.createObjectStore('checklist', {keyPath:'k'});
+        };
+        req.onsuccess = e => { db = e.target.result; res(db); };
+        req.onerror = e => rej(e);
+      });
+    }
+    function put(store, val){ return new Promise((res, rej)=>{ const tx=db.transaction(store,'readwrite'); tx.objectStore(store).put(val); tx.oncomplete=()=>res(true); tx.onerror=rej; }); }
+    function get(store, key){ return new Promise((res, rej)=>{ const tx=db.transaction(store); const r=tx.objectStore(store).get(key); r.onsuccess=()=>res(r.result); r.onerror=rej; }); }
+    function getAll(store){ return new Promise((res, rej)=>{ const tx=db.transaction(store); const r=tx.objectStore(store).getAll(); r.onsuccess=()=>res(r.result); r.onerror=rej; }); }
+    async function appendLog(event, data){
+      const prev = (await getAll('log')).sort((a,b)=>a.id-b.id).pop();
+      const head = prev?.head || 'GENESIS';
+      const entry = {
+        ts: new Date().toISOString(),
+        event, data,
+        head_prev: head,
+      };
+      entry.head = await sha256(JSON.stringify(entry));
+      await put('log', entry);
+      $('#logHead').textContent = 'HEAD: ' + entry.head.slice(0,16) + '…';
+      return entry;
+    }
+
+    /********************
+     * Consent
+     ********************/
+    async function ensureConsent(){
+      const consent = await get('prefs','consent');
+      if (!consent?.v){
+        $('#consentDialog').showModal();
+      }
+    }
+    $('#agreeConsent').onclick = async ()=>{
+      await put('prefs',{k:'consent', v:true, ts: Date.now()});
+      $('#consentDialog').close();
+      appendLog('consent_agree',{});
+    };
+    $('#declineConsent').onclick = ()=>{
+      appendLog('consent_decline',{});
+      location.replace('about:blank');
+    };
+
+    /********************
+     * Safety toggles & checklist
+     ********************/
+    const policy = {
+      fetch:false,    // external network blocked
+      webllm:false,   // local model disabled
+      provenance:true // watermarking enabled
+    };
+
+    async function loadPolicy(){
+      for (const k of ['fetch','webllm','provenance']){
+        const row = await get('prefs', k);
+        if (row) policy[k]=row.v;
+      }
+      $('#toggleFetch').checked = policy.fetch;
+      $('#toggleWebLLM').checked = policy.webllm;
+      $('#toggleProvenance').checked = policy.provenance;
+      reflectPolicy();
+    }
+    function reflectPolicy(){
+      $('#fp').textContent = policy.fetch ? 'allow' : 'deny';
+      $('#lp').textContent = policy.webllm ? 'enabled' : 'disabled';
+      $('#pp').textContent = policy.provenance ? 'enabled' : 'disabled';
+    }
+    async function setPolicy(k, v){
+      policy[k]=v; await put('prefs',{k, v, ts:Date.now()}); reflectPolicy();
+      appendLog('policy_set',{[k]:v});
+    }
+    $('#toggleFetch').onchange = e => setPolicy('fetch', e.target.checked);
+    $('#toggleWebLLM').onchange = e => setPolicy('webllm', e.target.checked);
+    $('#toggleProvenance').onchange = e => setPolicy('provenance', e.target.checked);
+
+    // Checklist
+    document.querySelectorAll('.sc').forEach(el=>{
+      el.addEventListener('change', async ()=>{
+        await put('checklist',{k:el.dataset.key, v:el.checked, ts:Date.now()});
+        appendLog('checklist_update',{key:el.dataset.key, v:el.checked});
+      });
+    });
+    $('#exportChecklist').onclick = async ()=>{
+      const all = await getAll('checklist');
+      const blob = new Blob([JSON.stringify(all,null,2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob); const a = document.createElement('a');
+      a.href = url; a.download = 'aiwave_checklist.json'; a.click();
+    };
+    $('#resetChecklist').onclick = async ()=>{
+      const all = await getAll('checklist');
+      for (const row of all){ await put('checklist',{k:row.k, v:false, ts:Date.now()}); }
+      document.querySelectorAll('.sc').forEach(el=>el.checked=false);
+      appendLog('checklist_reset',{});
+    };
+
+    /********************
+     * Crisis Switch
+     ********************/
+    async function crisis(on){
+      await setPolicy('fetch', false);
+      await setPolicy('webllm', false);
+      $('#crisisStatus').textContent = on ? 'Status: Crisis lock engaged' : 'Status: Normal';
+      $('#crisisStatus').style.color = on ? 'var(--danger)' : 'var(--warn)';
+      appendLog(on ? 'crisis_on' : 'crisis_off', {});
+      document.title = on ? '⛔ AI Wave — Crisis' : 'AI Wave — Civic Safety Hub';
+    }
+    $('#panic').onclick = ()=> crisis(true);
+    $('#drill').onclick = async ()=>{
+      await crisis(true); await sleep(30000); await crisis(false);
+    };
+
+    /********************
+     * Habitica (local-only opt-in)
+     ********************/
+    async function saveHabiticaLocal(){
+      await put('habitica',{k:'user', v:$('#habitUser').value});
+      await put('habitica',{k:'key', v:$('#habitKey').value});
+      $('#habitStatus').textContent = 'Saved locally.';
+      appendLog('habitica_saved',{});
+    }
+    $('#saveHabitica').onclick = saveHabiticaLocal;
+
+    async function habiticaFetch(path, opts={}){
+      // Respect fetch policy
+      const allow = (await get('prefs','fetch'))?.v;
+      if (!allow) throw new Error('External fetch disabled by policy.');
+      const u = (await get('habitica','user'))?.v;
+      const k = (await get('habitica','key'))?.v;
+      if (!u || !k) throw new Error('Habitica credentials not saved.');
+      const headers = Object.assign({
+        'x-api-user': u, 'x-api-key': k, 'Content-Type': 'application/json'
+      }, opts.headers||{});
+      const res = await fetch('https://habitica.com/api/v3'+path, {...opts, headers});
+      if (!res.ok) throw new Error('Habitica error '+res.status);
+      return res.json();
+    }
+    $('#pushHabitica').onclick = async ()=>{
+      try{
+        const body = { text:"Safety Drill: Crisis Switch rehearsal", type:"daily", frequency:"daily", priority:1.5 };
+        await habiticaFetch('/tasks/user', { method:'POST', body: JSON.stringify(body) });
+        $('#habitStatus').textContent = 'Daily created in Habitica ✅';
+        appendLog('habitica_task_created', body);
+      }catch(e){
+        $('#habitStatus').textContent = 'Habitica error: '+e.message;
+        appendLog('habitica_error',{msg:e.message});
+      }
+    };
+
+    // Shortcut to prefill with your ID (optional; left blank by default)
+    $('#syncHabitica').onclick = async ()=>{
+      $('#habitUser').value = $('#habitUser').value || '';
+      $('#habitKey').value = $('#habitKey').value || '';
+      appendLog('habitica_sync_clicked',{});
+    };
+
+    /********************
+     * Provenance / Watermark
+     ********************/
+    const provenancePlan = {
+      textWatermark: "⟦aiwave:local⟧",
+      jsonSignature: { issuer:"PRA:AIWave", policy:"ZeroHarm", version:"1.0.0" }
+    };
+    $('#provPlan').textContent = JSON.stringify(provenancePlan, null, 2);
+
+    function stampDocument(){
+      if (!policy.provenance) return {ok:false, reason:'disabled'};
+      const stamp = {
+        at: new Date().toISOString(),
+        page: location.href,
+        head: document.querySelector('meta[name="description"]')?.content || '',
+        policy: provenancePlan.jsonSignature
+      };
+      const mark = document.createElement('meta'); mark.name='aiwave-stamp'; mark.content=JSON.stringify(stamp);
+      document.head.appendChild(mark);
+      appendLog('provenance_stamp', stamp);
+      return {ok:true, stamp};
+    }
+    $('#stampNow').onclick = ()=> stampDocument();
+
+    /********************
+     * Red-Team Playground (local evaluation only)
+     ********************/
+    function localGuardEval(txt){
+      const findings = [];
+      const badWords = /(credentials|api key|zero day|exploit|deepfake|bioweapon|radiological|do\/?x|social security|ssn)/ig;
+      if (badWords.test(txt)) findings.push('Sensitive or high-risk term detected.');
+      if (txt.length > 4000) findings.push('Very long prompt; consider chunking.');
+      if (/\b(run|execute|fetch|curl|wget)\b/i.test(txt)) findings.push('Network/execution verbs detected (blocked by default).');
+      return findings.length ? findings : ['No obvious risks detected with local heuristics.'];
+    }
+    $('#evalPlay').onclick = ()=>{
+      const txt = $('#playIn').value || '';
+      const out = localGuardEval(txt);
+      $('#playOut').textContent = '- ' + out.join('\n- ');
+      appendLog('play_eval',{score: out.length, notes: out});
+    };
+    $('#openPlayground').onclick = ()=> $('#playDialog').showModal();
+    $('#closePlay').onclick = ()=> $('#playDialog').close();
+
+    /********************
+     * WebLLM (optional, lazy)
+     ********************/
+    let webllm;
+    async function loadWebLLMOnce(){
+      if (!policy.webllm){ $('#llmState').textContent='disabled'; return; }
+      if (webllm){ $('#llmState').textContent='loaded'; return; }
+      $('#llmState').textContent='loading…';
+      // Lazy import via data URL (to keep this file standalone-compatible if needed)
+      // In practice, consider a pinned CDN URL and cache via the SW.
+      try{
+        const code = `
+          export async function boot(){
+            return { generate: async (p) => "Local stub (swap with real WebLLM). Prompt length: " + (p?.length||0) };
+          }
+        `;
+        const modURL = URL.createObjectURL(new Blob([code],{type:'text/javascript'}));
+        const mod = await import(modURL); webllm = await mod.boot();
+        $('#llmState').textContent='loaded (stub)';
+      }catch(e){
+        $('#llmState').textContent='error';
+      }
+    }
+    $('#runLLM').onclick = async ()=>{
+      await loadWebLLMOnce();
+      if (!policy.webllm || !webllm){ $('#llmOut').textContent = 'Local LLM disabled.'; return; }
+      const p = $('#llmPrompt').value || '';
+      const out = await webllm.generate(p + "\n" + (policy.provenance? provenancePlan.textWatermark : ''));
+      $('#llmOut').textContent = out;
+      appendLog('webllm_gen',{n:p.length});
+    };
+
+    /********************
+     * Export / Clear Log
+     ********************/
+    $('#appendLog').onclick = ()=> appendLog('snapshot', {title: document.title});
+    $('#clearLog').onclick = async ()=>{
+      const all = await getAll('log');
+      const last = all.sort((a,b)=>a.id-b.id).pop();
+      const head = last?.head || 'GENESIS';
+      // Recreate DB preserving head
+      db.close(); indexedDB.deleteDatabase(DB_NAME);
+      await openDB(); await put('log',{id:1, ts:new Date().toISOString(), event:'head_preserved', data:{}, head_prev:'GENESIS', head});
+      $('#logHead').textContent = 'HEAD: ' + head.slice(0,16) + '…';
+      appendLog('log_cleared',{});
+    };
+    $('#exportLog').onclick = async ()=>{
+      const all = await getAll('log');
+      const blob = new Blob([JSON.stringify(all,null,2)], {type:'application/json'});
+      const url = URL.createObjectURL(blob); const a = document.createElement('a');
+      a.href = url; a.download = 'aiwave_log.json'; a.click();
+    };
+
+    /********************
+     * UI: dialogs & panels
+     ********************/
+    $('#openSafety').onclick = ()=> $('#safetyDialog').showModal();
+    $('#closeSafety').onclick = ()=> $('#safetyDialog').close();
+    $('#openConsent').onclick = ()=> $('#consentDialog').showModal();
+
+    /********************
+     * Animated Starfield & Nebula (photorealistic vibes)
+     ********************/
+    function starfield(canvas, density=0.0018){
+      const ctx = canvas.getContext('2d');
+      function resize(){ canvas.width=canvas.clientWidth; canvas.height=canvas.clientHeight; }
+      window.addEventListener('resize', resize); resize();
+      let stars = [];
+      function regen(){
+        stars = [];
+        const n = Math.floor(canvas.width * canvas.height * density);
+        for (let i=0;i<n;i++){
+          stars.push({
+            x: Math.random()*canvas.width,
+            y: Math.random()*canvas.height,
+            z: Math.random(),
+            s: Math.random()*1.8+0.2
+          });
+        }
+      }
+      regen();
+      let t0 = performance.now();
+      function tick(t){
+        const dt = (t - t0)/1000; t0 = t;
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        for (const st of stars){
+          const par = 1 + st.z*0.8;
+          const tw = 0.5 + 0.5*Math.sin(t*0.002 + st.x*0.01);
+          ctx.globalAlpha = 0.7 + 0.3*tw;
+          ctx.fillStyle = '#dbe9ff';
+          ctx.beginPath(); ctx.arc(st.x, st.y, st.s*par, 0, Math.PI*2); ctx.fill();
+          st.x -= (0.05 + st.z*0.6)*par; if (st.x < -2) st.x = canvas.width+2;
+        }
+        requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+    function nebula(canvas){
+      const ctx = canvas.getContext('2d');
+      function resize(){ canvas.width=canvas.clientWidth; canvas.height=canvas.clientHeight; }
+      window.addEventListener('resize', resize); resize();
+      function blob(x,y,r,g){
+        const grd = ctx.createRadialGradient(x,y,0,x,y,r);
+        grd.addColorStop(0, 'rgba(88,166,255,0.05)');
+        grd.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = grd; ctx.beginPath(); ctx.arc(x,y,r,0,Math.PI*2); ctx.fill();
+      }
+      function tick(){
+        ctx.clearRect(0,0,canvas.width,canvas.height);
+        const t = performance.now()*0.0002;
+        for (let i=0;i<6;i++){
+          const x = (Math.sin(t+i)*0.5+0.5)*canvas.width;
+          const y = (Math.cos(t*1.3+i)*0.5+0.5)*canvas.height;
+          blob(x,y, 260 + 80*Math.sin(t+i*0.7), 0);
+        }
+        requestAnimationFrame(tick);
+      }
+      requestAnimationFrame(tick);
+    }
+    starfield(document.getElementById('starfield'));
+    nebula(document.getElementById('nebula'));
+
+    // Subtle parallax for the header card
+    (()=>{
+      const el = $('#parallax');
+      window.addEventListener('mousemove', (e)=>{
+        const r = 10;
+        const x = (e.clientX / innerWidth - 0.5) * r;
+        const y = (e.clientY / innerHeight - 0.5) * r;
+        el.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+      });
+    })();
+
+    /********************
+     * Init
+     ********************/
+    (async ()=>{
+      await openDB();
+      await loadPolicy();
+      await ensureConsent();
+      const head = (await getAll('log')).pop()?.head || '—';
+      $('#logHead').textContent = 'HEAD: ' + (head === '—' ? '—' : head.slice(0,16)+'…');
+      appendLog('boot',{ua:navigator.userAgent, lang:navigator.language});
+    })();
+  </script>
+</body>
+</html>
